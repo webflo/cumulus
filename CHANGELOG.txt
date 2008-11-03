@@ -1,0 +1,6 @@
+CHANGELOG for Cumulus for Drupal 6
+
+
+2008-11-03 - lut4rp
+  - Added CHANGELOG.txt
+  - Did the initial 6.x compatible code commit.
