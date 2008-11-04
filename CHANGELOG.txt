@@ -1,0 +1,10 @@
+CHANGELOG for Cumulus for Drupal 5
+
+2008-11-03 - bjacob
+  - Display error message if cumulus.js is missing.
+  - Changed wording of field 'Font size interval'.
+  - Subject of block is now recognized by t().
+  - Added hook_theme().
+  - Added cumulus.install.
+  - Added LICENSE.txt.
+  - Updated README.txt.
