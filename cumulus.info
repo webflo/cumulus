@@ -1,5 +1,5 @@
 ;$Id$
 name = Cumulus
 description = "Provides a Flash-based 3D tag cloud." 
-core = 6.x
-dependencies[] = tagadelic
+dependencies = tagadelic
+package = "Taxonomy"

@@ -123,7 +123,12 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       // alternate content if flash or JS are disabled
       $tags_formatted_alt = theme('tagadelic_weighted', $tags);
       // JS for Flash
-      drupal_add_js(drupal_get_path('module', 'cumulus') .'/cumulus.js');
+      $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
+      if (file_exists($js)) {
+        drupal_add_js($js);
+      } else {
+        drupal_set_message(t('The file @folder is missing. Please add it to the cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
+      }
       // Flash params
       $param = array(
         'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') .'/cumulus.swf',
@@ -161,17 +166,6 @@ EOT;
 }
 
 /**
- * Implementation for hook_theme().
- */
-function cumulus_theme() {
-  return array(
-    'cumulus_weighted' => array(
-      'arguments' => array('terms' => NULL),
-    ),
-  );
-}
-
-/**
  * Theme function
  */
 function theme_cumulus_weighted($terms) {
@@ -179,7 +173,7 @@ function theme_cumulus_weighted($terms) {
   foreach ($terms as $term) {
     // assign font size
     $font_size = (intval($term->weight) * variable_get('cumulus_flash_font_size_interval', 2)) + (variable_get('cumulus_flash_font_size', 10) - variable_get('cumulus_flash_font_size_interval', 2));
-    $output .= l($term->name, taxonomy_term_path($term), array('attributes' => array('style' => '"font-size: '. $font_size .'px;"'))) ." \n";
+    $output .= l($term->name, taxonomy_term_path($term), array('style' => '"font-size: '. $font_size .'px;"')) ." \n";
   }
   $output .= '</tags>';
   $output = urlencode($output);
