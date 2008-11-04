@@ -1,5 +1,6 @@
-CHANGELOG for Cumulus for Drupal 6
-
+======
+= CHANGELOG for Cumulus, HEAD version
+======
 
 2008-11-03 - lut4rp
   - Added CHANGELOG.txt
