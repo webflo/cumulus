@@ -127,7 +127,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       if (file_exists($js)) {
         drupal_add_js($js);
       } else {
-        drupal_set_message(t('The file @folder is missing. Please add it to the cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
+        drupal_set_message(t('The file @folder is missing. Please download it from http://pratul.in/files/cumulus.js, and add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
       }
       // Flash params
       $param = array(
