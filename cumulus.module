@@ -123,7 +123,12 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       // alternate content if flash or JS are disabled
       $tags_formatted_alt = theme('tagadelic_weighted', $tags);
       // JS for Flash
-      drupal_add_js(drupal_get_path('module', 'cumulus') .'/cumulus.js');
+      $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
+      if (file_exists($js)) {
+        drupal_add_js($js);
+      } else {
+        drupal_set_message(t('The file @folder is missing. Please add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
+      }
       // Flash params
       $param = array(
         'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') .'/cumulus.swf',
