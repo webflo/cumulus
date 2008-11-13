@@ -1,10 +1,12 @@
 <?php
 //  $Id$
+
 /**
  * @file
  * Provides a Flash-based 3D tag cloud.
  * Based on WP-Cumulus for WordPress, by Roy Tanck.
  */
+
 /**
  * Implementation of hook_block().
  */
@@ -175,6 +177,7 @@ EOT;
       return $blocks;
   }
 }
+
 /**
  * Theme function
  */
