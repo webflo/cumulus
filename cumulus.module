@@ -27,10 +27,10 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       );
       $form['tagadelic_step'] = array(
         '#type' => 'textfield',
-        '#title' => t('Tag-size interval'),
+        '#title' => t('Tag size interval'),
         '#default_value' => variable_get('cumulus_tagadelic_step', 6),
         '#maxlength' => 2,
-        '#description' => t('The amount of tag-sizes you will be using.'),
+        '#description' => t('The number of tag sizes you want to use.'),
       );
       $form['tagadelic_limit'] = array(
         '#type' => 'textfield',
@@ -58,7 +58,17 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
         '#title' => t('Background color of cumulus'),
         '#default_value' => variable_get('cumulus_flash_background', 'ffffff'),
         '#maxlength' => 6,
-        '#description' => t('The hex color value for the background of the cumulus. E.g. ffffff.'),
+        '#description' => t('The hex color value for the background of the cumulus. E.g. ffffff. If "Background transparency" is enabled this option has no effect.'),
+      );
+      $form['flash_transparency'] = array(
+        '#type' => 'select',
+        '#title' => t('Background transparency'),
+        '#default_value' => variable_get('cumulus_flash_transparency', 'false'),
+        '#options' => array(
+          'false' => t('no'),
+          'true' => t('yes'),
+        ),
+        '#description' => t('Enabling background transparency might cause issues with some (mostly older) browsers. Under Linux, transparency doesn\'t work at all due to a known limitation in the current Flash player.'),
       );
       $form['flash_color'] = array(
         '#type' => 'textfield',
@@ -107,6 +117,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       variable_set('cumulus_flash_width', $edit['flash_width']);
       variable_set('cumulus_flash_height', $edit['flash_height']);
       variable_set('cumulus_flash_background', $edit['flash_background']);
+      variable_set('cumulus_flash_transparency', $edit['flash_transparency']);
       variable_set('cumulus_flash_color', $edit['flash_color']);
       variable_set('cumulus_flash_speed', $edit['flash_speed']);
       variable_set('cumulus_flash_distribute', $edit['flash_distribute']);
@@ -126,7 +137,8 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
       if (file_exists($js)) {
         drupal_add_js($js);
-      } else {
+      } 
+      else {
         drupal_set_message(t('The file @folder is missing. Please download it from http://pratul.in/files/cumulus.js, and add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
       }
       // Flash params
@@ -139,6 +151,9 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
         'speed' => variable_get('cumulus_flash_speed', 220),
         'distribute' => variable_get('cumulus_flash_distribute', 'true'),
       );
+      if (variable_get('cumulus_flash_transparency', 'false') == 'true' ) {
+        $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
+      }
       // link to view with additional tags
       $links['more'] = l(t('more tags'), 'tagadelic/chunk/'. variable_get('cumulus_vid', 1));
       // output content
@@ -150,6 +165,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
         <script type="text/javascript">
           var rnumber = Math.floor(Math.random()*9999999);
           var widget_so = new SWFObject("{$param['path_to_flash']}?r="+rnumber, "cumulusflash", "{$param['width']}", "{$param['height']}", "9", "{$param['background']}");
+          {$param['transparency']}
           widget_so.addParam("allowScriptAccess", "always");
           widget_so.addVariable("tcolor", "{$param['color']}");
           widget_so.addVariable("tspeed", "{$param['speed']}");
