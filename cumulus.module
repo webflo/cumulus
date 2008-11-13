@@ -132,27 +132,28 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       // alternate content if flash or JS are disabled
       $tags_formatted_alt = theme('tagadelic_weighted', $tags);
       // JS for Flash
-      $js = drupal_get_path('module', 'cumulus') . '/cumulus.js';
+      $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
       if (file_exists($js)) {
         drupal_add_js($js);
-      } else {
+      } 
+      else {
         drupal_set_message(t('The file @folder is missing. Please download it from http://pratul.in/files/cumulus.js, and add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
       }
       // Flash params
       $param = array(
-        'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') . '/cumulus.swf',
+        'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') .'/cumulus.swf',
         'width' => variable_get('cumulus_flash_width', 1),
         'height' => variable_get('cumulus_flash_height', 1),
         'background' => variable_get('cumulus_flash_background', 'ffffff'),
-        'color' => '0x' . variable_get('cumulus_flash_color', '000000'),
+        'color' => '0x'. variable_get('cumulus_flash_color', '000000'),
         'speed' => variable_get('cumulus_flash_speed', 220),
         'distribute' => variable_get('cumulus_flash_distribute', 'true'),
       );
-      if (variable_get('cumulus_flash_transparency', 'false') == 'true' ) {
+      if (variable_get('cumulus_flash_transparency', 'false') == 'true') {
         $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
       }
       // link to view with additional tags
-      $links['more'] = l(t('more tags'), 'tagadelic/chunk/' . variable_get('cumulus_vid', 1));
+      $links['more'] = l(t('more tags'), 'tagadelic/chunk/'. variable_get('cumulus_vid', 1));
       // output content
       $blocks['subject'] = t('Cumulus Tag Cloud');
       // param with value 9 indicates required version of flash player - see http://blog.deconcept.com/swfobject/
@@ -186,7 +187,7 @@ function theme_cumulus_weighted($terms) {
   foreach ($terms as $term) {
     // assign font size
     $font_size = (intval($term->weight) * variable_get('cumulus_flash_font_size_interval', 2)) + (variable_get('cumulus_flash_font_size', 10) - variable_get('cumulus_flash_font_size_interval', 2));
-    $output .= l($term->name, taxonomy_term_path($term), array('style' => '"font-size: ' . $font_size . 'px;"')) . " \n";
+    $output .= l($term->name, taxonomy_term_path($term), array('style' => '"font-size:'. $font_size .'px;"')) ." \n";
   }
   $output .= '</tags>';
   $output = urlencode($output);
