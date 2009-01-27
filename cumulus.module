@@ -7,6 +7,13 @@
  */
 
 /**
+ * Implementation of hook_enable().
+ */
+function cumulus_enable() {
+  drupal_set_message(t('Cumulus has now been enabled. You need to !configure the Cumulus block settings before you use it.', array('!configure' => l(t('configure and save'), 'admin/build/block'))));
+}
+
+/**
  * Implementation of hook_block().
  */
 function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
@@ -137,9 +144,12 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
       if (file_exists($js)) {
         drupal_add_js($js);
-      } 
+      }
       else {
         drupal_set_message(t('The file @folder is missing. Please download it from http://pratul.in/files/cumulus.js, and add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
+      }
+      if (!(variable_get('cumulus_vid', 1))) {
+        drupal_set_message(t('You haven\'t yet configured and saved the Cumulus settings on !link. Cumulus might not work properly!', array('!link' => l('your blocks configuration page', 'admin/build/block/configure/cumulus/0'))), 'warning');
       }
       // Flash params
       $param = array(
@@ -206,4 +216,21 @@ function theme_cumulus_weighted($terms) {
   $output = urlencode($output);
 
   return $output;
+}
+
+/**
+ * Implementation of hook_help().
+ */
+function cumulus_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#cumulus':
+      $output = '<p>'. t('Cumulus allows you to display a taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') .'</p>';
+      $output .= '<p>'.'<strong>'. t('Configuring Cumulus: ') .'</strong>'.'<br />';
+      $output .= t('By default, Cumulus is rendered as a block. You need to enable and configure that block to see it. If you don\'t configure and save the Cumulus block settings once, it will not work! Do that before wondering what\'s wrong :-)') .'</p>';
+      $output .= '<p>'.'<strong>'. t('Known issues:') .'</strong>'.'<br />';
+      $output .= '<ul>';
+      $output .= '<li>'. t('If you find old tags being displayed by Cumulus, you can !clearcache', array('!clearcache' => l(t('clear your Drupal cache.'), 'admin/settings/performance'))) .'</li>';
+      $output .= '</ul>'.'</p>';
+      return $output;
+  }
 }
