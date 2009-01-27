@@ -12,18 +12,15 @@ It is based on Roy Tanck's WordPress module called WP-Cumulus (see http://wordpr
  */
 
 - After you put Cumulus in your sites/all/modules or sites/default/modules (or where ever you put them :-) you need one more file...
-- That file is cumulus.js (which can't be put on drupal.org since its not licensed under GPL.)
-- Get that file from http://pratul.in/files/cumulus.js
-- Put in your Cumulus folder.
+- That file is cumulus.js (which can't be put on drupal.org since its not licensed under GPL v2.)
+- Get that file from http://pratul.in/files/cumulus.js or http://pratulkalia.googlepages.com/cumulus.js
+- Put it in your Cumulus folder.
 - That's it!
 
 
 /**
- * Frequently Asked Questions
+ * Support
  */
 
-= Cumulus is breaking my theme for anonymous users and not displaying
-at all/correctly. Help!
-- Unfortunately, block caching in Drupal 6 is on a per-role basis. Thus
-it will break Cumulus if its turned on your site. Turn it off and
-Cumulus will be happy. You can find the settings on admin/settings/performance
+- First, read the in-built help at admin/help/cumulus
+- For more support, feature requests, or to report any bugs, please add an issue to the queue at http://drupal.org/project/issues/cumulus
