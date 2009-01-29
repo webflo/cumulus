@@ -27,10 +27,10 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
     case 'configure':
       $form['vid'] = array(
         '#type' => 'textfield',
-        '#title' => t('Vocabulary ID'),
+        '#title' => t('Vocabulary IDs to be included'),
         '#default_value' => variable_get('cumulus_vid', 1),
-        '#maxlength' => 3,
-        '#description' => t('The ID of the vocabulary to display.'),
+        '#maxlength' => 10,
+        '#description' => t('The IDs of the vocabularies that will be displayed. Separate the IDs by commas only (eg: 1,3,4)'),
       );
       $form['tagadelic_step'] = array(
         '#type' => 'textfield',
@@ -44,7 +44,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
         '#title' => t('Number of tags to display'),
         '#default_value' => variable_get('cumulus_tagadelic_limit', 24),
         '#maxlength' => 2,
-        '#description' => t('The number of tags to display.'),
+        '#description' => t('The maximum number of tags that will be displayed.'),
       );
       $form['flash_width'] = array(
         '#type' => 'textfield',
@@ -65,7 +65,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
         '#title' => t('Background color of cumulus'),
         '#default_value' => variable_get('cumulus_flash_background', 'ffffff'),
         '#maxlength' => 6,
-        '#description' => t('The hex color value for the background of the cumulus. E.g. ffffff. If "Background transparency" is enabled this option has no effect.'),
+        '#description' => t('The hex color value for the background of the cumulus. E.g. ffffff. If "Background transparency" is enabled, this option will have no effect.'),
       );
       $form['flash_transparency'] = array(
         '#type' => 'select',
@@ -75,7 +75,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
           'false' => t('no'),
           'true' => t('yes'),
         ),
-        '#description' => t('Enabling background transparency might cause issues with some (mostly older) browsers. Under Linux, transparency doesn\'t work at all due to a known limitation in the current Flash player.'),
+        '#description' => t('Enabling background transparency might cause issues with some (mostly older) browsers.<br />Under Linux, transparency doesn\'t work at all due to a known limitation in the current Flash player.'),
       );
       $form['flash_color'] = array(
         '#type' => 'textfield',
@@ -134,7 +134,17 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
 
     case 'view':
       // Tagadelic API
-      $tags = tagadelic_get_weighted_tags(array(variable_get('cumulus_vid', 1)), variable_get('cumulus_tagadelic_step', 6), variable_get('cumulus_tagadelic_limit', 24));
+      $vocs=variable_get('cumulus_vid',1);
+      if (is_numeric($vocs)){
+        $vocs = array($vocs);
+      }
+      elseif (preg_match('/^([0-9]+,){1,5}[0-9]+$/', $vocs)){
+        $vocs = explode(',', $vocs);
+      }
+      else {
+        $vocs = array(1);
+      }
+      $tags = tagadelic_get_weighted_tags($vocs);
       $tags = tagadelic_sort_tags($tags);
       // theme tags for cumulus: tags tag, font size, link, encode
       $tags_formatted_flash = theme('cumulus_weighted', $tags);
