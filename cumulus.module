@@ -19,9 +19,8 @@ function cumulus_enable() {
 function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
     case 'list':
-      $blocks[0] = array(
-        'info' => t('Cumulus Tag Cloud'),
-      );
+      $blocks[0]['info'] = t('Cumulus Tag Cloud');
+      $blocks[0]['cache'] = BLOCK_NO_CACHE;
       return $blocks;
 
     case 'configure':
@@ -87,7 +86,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       $form['flash_speed'] = array(
         '#type' => 'textfield',
         '#title' => t('Rotation speed'),
-        '#default_value' => variable_get('cumulus_flash_speed', 150),
+        '#default_value' => variable_get('cumulus_flash_speed', 100),
         '#maxlength' => 3,
         '#description' => t('Set the speed of the cumulus. Options between 25 and 500 work best.'),
       );
@@ -133,12 +132,11 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       return;
 
     case 'view':
-      // Tagadelic API
-      $vocs=variable_get('cumulus_vid',1);
-      if (is_numeric($vocs)){
+      $vocs = variable_get('cumulus_vid', 1);
+      if (is_numeric($vocs)) {
         $vocs = array($vocs);
       }
-      elseif (preg_match('/^([0-9]+,){1,5}[0-9]+$/', $vocs)){
+      elseif (preg_match('/^([0-9]+,){1,5}[0-9]+$/', $vocs)) {
         $vocs = explode(',', $vocs);
       }
       else {
@@ -146,17 +144,15 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       }
       $tags = tagadelic_get_weighted_tags($vocs);
       $tags = tagadelic_sort_tags($tags);
-      // theme tags for cumulus: tags tag, font size, link, encode
       $tags_formatted_flash = theme('cumulus_weighted', $tags);
-      // alternate content if flash or JS are disabled
       $tags_formatted_alt = theme('tagadelic_weighted', $tags);
-      // JS for Flash
+
       $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
       if (file_exists($js)) {
         drupal_add_js($js, 'module', 'header', FALSE, TRUE, FALSE);
       }
       else {
-        drupal_set_message(t('The file @folder is missing. Please download it from http://pratul.in/files/cumulus.js, and add it to the Cumulus module folder! See README.txt for further instructions.', array('@folder' => $js)), 'error');
+        drupal_set_message(t('The file @folder is missing. Please download it from !link, and add it to the Cumulus module folder!', array('@folder' => $js, '!link' => l('http://pratul.in/files/cumulus.js', 'http://pratul.in/files/cumulus.js'))), 'error');
       }
       if (!(variable_get('cumulus_vid', 1))) {
         drupal_set_message(t('You haven\'t yet configured and saved the Cumulus settings on !link. Cumulus might not work properly!', array('!link' => l('your blocks configuration page', 'admin/build/block/configure/cumulus/0'))), 'warning');
@@ -213,7 +209,7 @@ function cumulus_theme() {
 }
 
 /**
- * Theme function
+ * Themeing function
  */
 function theme_cumulus_weighted($terms) {
   $output = '<tags>';
@@ -237,10 +233,58 @@ function cumulus_help($path, $arg) {
       $output = '<p>'. t('Cumulus allows you to display a taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') .'</p>';
       $output .= '<p>'.'<strong>'. t('Configuring Cumulus: ') .'</strong>'.'<br />';
       $output .= t('By default, Cumulus is rendered as a block. You need to enable and configure that block to see it. If you don\'t configure and save the Cumulus block settings once, it will not work! Do that before wondering what\'s wrong :-)') .'</p>';
-      $output .= '<p>'.'<strong>'. t('Known issues:') .'</strong>'.'<br />';
-      $output .= '<ul>';
-      $output .= '<li>'. t('If you find old tags being displayed by Cumulus, you can !clearcache', array('!clearcache' => l(t('clear your Drupal cache.'), 'admin/settings/performance'))) .'</li>';
-      $output .= '</ul>'.'</p>';
       return $output;
   }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function cumulus_menu() {
+  $items = array();
+  $items['admin/settings/cumulus'] = array(
+    'title' => 'Cumulus',
+    'description' => 'Cumulus settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cumulus_admin_settings'),
+    'access arguments' => array('administer cumulus'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_settings().
+ */
+function cumulus_admin_settings() {
+  $form['settings'] = array(
+    '#type'  => 'fieldset',
+    '#title' => t('Clear the Cumulus cache'),
+    '#description' => t('If you see older terms, or are unable to see terms from newly added vocabularies, try clearing the cache.<br />This will only clear the Cumulus related data from the cache. It will not clear the full Drupal cache.'),
+  );
+  $form['settings']['clear_cache'] = array(
+    '#type' => 'submit',
+    '#value' => t('Click to clear'),
+    '#submit' => array('cumulus_clear_cache'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Clear the cache of all Cumulus (in effect, Tagadelic) data.
+ */
+function cumulus_clear_cache() {
+  $cid = "tagadelic";
+  $table = "cache";
+  $wildcard = TRUE;
+  cache_clear_all($cid, $table, $wildcard);
+  drupal_set_message(t('The module\'s cache has been cleared'), 'status');
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function cumulus_perm() {
+  return array('administer cumulus');
 }
