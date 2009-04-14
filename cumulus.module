@@ -56,7 +56,7 @@ function cumulus_block($op = 'list', $delta = 0, $edit = array()) {
       else {
         $vocs = array(1);
       }
-      $tags = tagadelic_get_weighted_tags($vocs);
+      $tags = tagadelic_get_weighted_tags($vocs, variable_get('cumulus_tagadelic_step', 6), variable_get('cumulus_tagadelic_limit', 24));
       $tags = tagadelic_sort_tags($tags);
       $tags_formatted_flash = theme('cumulus_weighted', $tags);
       $tags_formatted_alt = theme('tagadelic_weighted', $tags);
