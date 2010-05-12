@@ -13,4 +13,3 @@ function cumulus_uninstall() {
   drupal_uninstall_schema('cumulus');
   db_query("DELETE FROM {variable} WHERE name LIKE 'cumulus_%'");
 }
-
