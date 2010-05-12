@@ -7,20 +7,6 @@
  */
 
 /**
- * Implementation of hook_install().
- */
-function cumulus_install() {
-  drupal_install_schema('cumulus');
-}
-
-/**
- * Implementation of hook_schema().
- */
-function cumulus_schema() {
-  return array();
-}
-
-/**
  * Implementation of hook_uninstall().
  */
 function cumulus_uninstall() {
