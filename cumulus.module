@@ -1,4 +1,5 @@
 <?php
+
 //  $Id$
 /**
  * @file
@@ -77,28 +78,38 @@ function template_preprocess_views_view_cumulus(&$vars) {
       $weight = 1 + floor($options['size_interval'] * intval($row->{$view->field[$options['use_field_as_weight']['weight_field']]->field_alias}) / $range);
     }
     $font_size = (intval($weight) * $options['flash_font_size_interval']) + ($options['flash_font_size'] - $options['flash_font_size_interval']);
-    $tags_formatted_flash .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('style' => 'font-size: '. $font_size .'px;'))) ." \n";
-    $tags_formatted_alt .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('class' => 'tagadelic level'. $weight, 'rel' => 'tag', 'title' => $row->{$title_field->field_alias}))) ." \n";
+    $tags_formatted_flash .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('style' => 'font-size: ' . $font_size . 'px;')));
+    $tags_formatted_alt .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('class' => 'tagadelic level' . $weight, 'rel' => 'tag', 'title' => $row->{$title_field->field_alias}))) . " \n";
     $index++;
   }
   // Flash params
-  $params = array(
-    'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') .'/cumulus.swf',
-    'width' => $options['flash_width'],
-    'height' => $options['flash_height'],
-    'background' => $options['flash_background'],
-    'color' => '0x'. $options['flash_color'],
-    'color2' => '0x'. $options['flash_color2'],
-    'hicolor' => '0x'. $options['flash_hicolor'],
-    'speed' => $options['flash_speed'],
-    'distribute' => $options['flash_distribute'],
+  $swf_options = array(
+    'params' => array(
+      'width' => $options['flash_width'],
+      'height' => $options['flash_height'],
+     ),
+    'flashvars' => array(
+      'background' => $options['flash_background'],
+      'color' => '0x' . $options['flash_color'],
+      'color2' => '0x' . $options['flash_color2'],
+      'hicolor' => '0x' . $options['flash_hicolor'],
+      'speed' => $options['flash_speed'],
+      'distribute' => $options['flash_distribute'],
+      'mode' => 'tags',
+      'tagcloud' => '<tags>' . $tags_formatted_flash . '</tags>',
+    ),
+    'othervars' => array (
+      'no_flash' => $tags_formatted_alt,
+      'html_alt' => $tags_formatted_alt,
+    ),
   );
   if ('true' == $options['flash_transparency']) {
-    $params['transparency'] = 'widget_so.addParam("wmode", "transparent");';
+    $params['wmode'] = 'transparent';
   }
-  $vars['params'] = $params;
-  $vars['tags_formatted_flash'] = urlencode('<tags>'. $tags_formatted_flash .'</tags>');
-  $vars['tags_formatted_alt'] = $tags_formatted_alt;
+  // $vars['tags_formatted_flash'] = urlencode('<tags>' . $tags_formatted_flash . '</tags>');
+  $swf_url = url(drupal_get_path('module', 'cumulus') . '/tagcloud.swf', array('absolute' => TRUE));
+
+  $vars['cumulus'] = swf($swf_url, $swf_options);
 }
 
 /**
@@ -107,7 +118,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
 function cumulus_help($path, $arg) {
   switch ($path) {
     case 'admin/help#cumulus':
-      $output = '<p>'. t('Cumulus allows you to display a taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') .'</p>';
+      $output = '<p>' . t('Cumulus allows you to display a taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') . '</p>';
       return $output;
   }
 }
