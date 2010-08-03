@@ -106,7 +106,6 @@ function template_preprocess_views_view_cumulus(&$vars) {
   if ('true' == $options['flash_transparency']) {
     $params['wmode'] = 'transparent';
   }
-  // $vars['tags_formatted_flash'] = urlencode('<tags>' . $tags_formatted_flash . '</tags>');
   $swf_url = url(drupal_get_path('module', 'cumulus') . '/tagcloud.swf', array('absolute' => TRUE));
 
   $vars['cumulus'] = swf($swf_url, $swf_options);

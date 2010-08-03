@@ -180,14 +180,6 @@ class views_cumulus_style_plugin extends views_plugin_style {
    */
   function render() {
     $output = parent::render();
-    $js = drupal_get_path('module', 'cumulus') .'/cumulus.js';
-    if (file_exists($js)) {
-      drupal_add_js($js, 'module', 'header', FALSE, TRUE, FALSE);
-    }
-    else {
-      drupal_set_message(t('The file @folder is missing. Please download it from !link, and add it to the Cumulus module folder!', array('@folder' => $js, '!link' => l('http://pratul.in/files/cumulus.js', 'http://pratul.in/files/cumulus.js'))), 'error');
-    }
-
     return $output;
   }
 }
