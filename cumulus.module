@@ -117,7 +117,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
 function cumulus_help($path, $arg) {
   switch ($path) {
     case 'admin/help#cumulus':
-      $output = '<p>' . t('Cumulus allows you to display a taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') . '</p>';
+      $output = '<p>' . t('Cumulus allows you to display strings like taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') . '</p>';
       return $output;
   }
 }
