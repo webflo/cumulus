@@ -21,7 +21,10 @@ function cumulus_enable() {
  * Notifies the Views module that we're compatible with a particular API revision.
  */
 function cumulus_views_api() {
-  return array('api' => 2);
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'cumulus') . '/includes/views',
+  );
 }
 
 /**
@@ -106,7 +109,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
   if ('true' == $options['flash_transparency']) {
     $params['wmode'] = 'transparent';
   }
-  $swf_url = url(drupal_get_path('module', 'cumulus') . '/tagcloud.swf', array('absolute' => TRUE));
+  $swf_url = url(drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf', array('absolute' => TRUE));
 
   $vars['cumulus'] = swf($swf_url, $swf_options);
 }

@@ -18,11 +18,13 @@ function cumulus_views_plugins() {
         'help' => t('Displays rows as an flash-based 3D "tag"-cloud.'),
         'handler' => 'views_cumulus_style_plugin',
         'theme' => 'views_view_cumulus',
+        'theme path' => drupal_get_path('module', 'cumulus') . '/includes/views',
         'uses row plugin' => FALSE,
         'uses options' => TRUE,
         'uses fields' => TRUE,
         'uses grouping' => FALSE,
         'type' => 'normal',
+        'path' => drupal_get_path('module', 'cumulus') . '/includes/views',
       ),
     ),
   );

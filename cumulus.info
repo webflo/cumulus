@@ -4,5 +4,4 @@ description = "Cumulus is a Views style plugin that provides a Flash-based 3D ta
 core = 6.x
 dependencies[] = views
 dependencies[] = swftools
-dependencies[] = swfobject2
 package = Views
