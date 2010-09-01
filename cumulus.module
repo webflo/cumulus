@@ -85,33 +85,76 @@ function template_preprocess_views_view_cumulus(&$vars) {
     $tags_formatted_alt .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('class' => 'tagadelic level' . $weight, 'rel' => 'tag', 'title' => $row->{$title_field->field_alias}))) . " \n";
     $index++;
   }
-  // Flash params
-  $swf_options = array(
-    'params' => array(
-      'width' => $options['flash_width'],
-      'height' => $options['flash_height'],
-     ),
-    'flashvars' => array(
-      'background' => $options['flash_background'],
-      'color' => '0x' . $options['flash_color'],
-      'color2' => '0x' . $options['flash_color2'],
-      'hicolor' => '0x' . $options['flash_hicolor'],
-      'speed' => $options['flash_speed'],
-      'distribute' => $options['flash_distribute'],
-      'mode' => 'tags',
-      'tagcloud' => '<tags>' . $tags_formatted_flash . '</tags>',
-    ),
-    'othervars' => array (
-      'no_flash' => $tags_formatted_alt,
-      'html_alt' => $tags_formatted_alt,
-    ),
+
+  // Common variables we need regardless of implementation.
+  $flashvars = array(
+    'background' => $options['flash_background'],
+    'tcolor' => '0x' . $options['flash_color'],
+    'tcolor2' => '0x' . $options['flash_color2'],
+    'hicolor' => '0x' . $options['flash_hicolor'],
+    'tspeed' => $options['flash_speed'],
+    'distr' => $options['flash_distribute'],
+    'mode' => 'tags',
+    'tagcloud' => '<tags>' . $tags_formatted_flash . '</tags>',
   );
+  $transparency = false;
   if ('true' == $options['flash_transparency']) {
-    $params['wmode'] = 'transparent';
+    $transparency = 'transparent';
   }
   $swf_url = url(drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf', array('absolute' => TRUE));
 
-  $vars['cumulus'] = swf($swf_url, $swf_options);
+  // If the swftools module and its submodule for swfobject is installed use
+  // it instead of our own implementation.
+  if (module_exists('swftools') && module_exists('swfobject2')) {
+    // Flash params
+    $swf_options = array(
+      'params' => array(
+        'width' => $options['flash_width'],
+        'height' => $options['flash_height'],
+      ),
+      'flashvars' => $flashvars,
+      'othervars' => array(
+        'no_flash' => $tags_formatted_alt,
+        'html_alt' => $tags_formatted_alt,
+      ),
+    );
+    if ($transparency) {
+      $params['wmode'] = $transparency;
+    }
+
+    $vars['cumulus'] = swf($swf_url, $swf_options);
+  }
+  // Use swfobject directly from google and own implementation. I don't like
+  // this but it makes the module run outofthebox and I didn't find a better
+  // way.
+  else {
+
+    drupal_set_html_head('<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>');
+    $temp_id = 'cumulus-' . time();
+    $params = array(
+      'wmode' => ( $transparency ? $transparency : 'opaque'),
+      'bgcolor' => $options['flash_background'],
+      'width' => $options['flash_width'],
+      'height' => $options['flash_height'],
+    );
+    $vars['cumulus'] = '
+<div id="' . $temp_id . '">
+'.$tags_formatted_alt.'
+</div>
+<script type="text/javascript">
+swfobject.embedSWF(
+  "' . $swf_url . '",
+  "' . $temp_id . '",
+  "' . $options['flash_width'] . '",
+  "' . $options['flash_height'] . '",
+  "7",
+  "",
+  ' . drupal_to_js($flashvars) . ',
+  ' . drupal_to_js($params) . '
+);
+</script>
+';
+  }
 }
 
 /**
