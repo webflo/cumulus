@@ -13,7 +13,7 @@
  * Implementation of hook_enable().
  */
 function cumulus_enable() {
-  drupal_set_message(t('Cumulus has now been enabled. You need to !add a view with cumulus selected as output style to display the cloud.', array('!add' => l(t('add'), 'admin/build/views/add'))));
+  drupal_set_message(t('Cumulus has now been enabled. You need to !add a view with cumulus selected as output style to display the cloud. Or !activate the example view for a taxonomy cumulus block.', array('!add' => l(t('add'), 'admin/build/views/add'), '!activate' => l(t('activate'), 'admin/build/views'))));
 }
 
 /**
@@ -97,7 +97,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
     'mode' => 'tags',
     'tagcloud' => '<tags>' . $tags_formatted_flash . '</tags>',
   );
-  $transparency = false;
+  $transparency = FALSE;
   if ('true' == $options['flash_transparency']) {
     $transparency = 'transparent';
   }
@@ -139,7 +139,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
     );
     $vars['cumulus'] = '
 <div id="' . $temp_id . '">
-'.$tags_formatted_alt.'
+' . $tags_formatted_alt . '
 </div>
 <script type="text/javascript">
 swfobject.embedSWF(

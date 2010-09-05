@@ -1,18 +1,9 @@
 <?php
 
-// $Id$
-
 /**
- * @file
- * Contains the cumulus style plugin.
+ * A tag-cloud summary style view.
  */
-
-/**
- * Style plugin to render the results as a 3D Flash-cloud.
- *
- * @ingroup views_style_plugins
- */
-class views_cumulus_style_plugin extends views_plugin_style {
+class views_cumulus_summary_style_plugin extends views_plugin_style_summary {
 
   /**
    * Set default options
@@ -178,4 +169,3 @@ class views_cumulus_style_plugin extends views_plugin_style {
   }
 
 }
-
