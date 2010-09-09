@@ -137,23 +137,26 @@ function template_preprocess_views_view_cumulus(&$vars) {
       'width' => $options['flash_width'],
       'height' => $options['flash_height'],
     );
-    $vars['cumulus'] = '
-<div id="' . $temp_id . '">
-' . $tags_formatted_alt . '
-</div>
+
+    $width = $options['flash_width'];
+    $height = $options['flash_height'];
+    $flashvars = drupal_to_js($flashvars);
+    $params = drupal_to_js($params);
+    $vars['cumulus'] = <<< EOT
+<div id="$temp_id">$tags_formatted_alt</div>
 <script type="text/javascript">
 swfobject.embedSWF(
-  "' . $swf_url . '",
-  "' . $temp_id . '",
-  "' . $options['flash_width'] . '",
-  "' . $options['flash_height'] . '",
+  "$swf_url",
+  "$temp_id",
+  "$width",
+  "$height",
   "7",
   "",
-  ' . drupal_to_js($flashvars) . ',
-  ' . drupal_to_js($params) . '
+  $flashvars,
+  $params
 );
 </script>
-';
+EOT;
   }
 }
 
