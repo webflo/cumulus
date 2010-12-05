@@ -14,6 +14,9 @@
  */
 function cumulus_enable() {
   drupal_set_message(t('Cumulus has now been enabled. You need to !add a view with cumulus selected as output style to display the cloud. Or !activate the example view for a taxonomy cumulus block.', array('!add' => l(t('add'), 'admin/build/views/add'), '!activate' => l(t('activate'), 'admin/build/views'))));
+  if (!module_exists('views_ui')) {
+    drupal_set_message('If you need to activate the cumulus views make sure views UI is active as well.');
+  }
 }
 
 /**
@@ -32,132 +35,9 @@ function cumulus_views_api() {
  *
  * @param array $vars
  *  Array of template variables.
- *
- * The JS file is loaded within render() in views_cumulus_style_plugin.inc.
  */
 function template_preprocess_views_view_cumulus(&$vars) {
-  $view = $vars['view'];
-  $rows = $vars['rows'];
-
-  // Calculate weight values and font sizes based on sorting.
-  $options = $view->style_options;
-  // Range is from 1 to count($rows).
-  $range = max(.01, count($rows)) * 1.0001;
-  $index = 1;
-  $weight = 0;
-  $tags_formatted_flash = '';
-  $tags_formatted_alt = '';
-
-  if (empty($options['title_field'])) {
-    drupal_set_message(t('You have to define a title field to display items.'), 'error');
-    return;
-  }
-  $title_field = $view->field[$options['title_field']];
-  $field_options = $title_field->options;
-  $link_item = 0;
-  $item_path = '';
-  if (isset($field_options['alter']['make_link'])) {
-    $link_item = $field_options['alter']['make_link'];
-    $item_path = $field_options['alter']['path'];
-  }
-  foreach ($rows as $id => $row) {
-    $tokens = array();
-    // Get token replacements.
-    foreach ($view->display_handler->get_handlers('field') as $field => $handler) {
-      if (isset($row->{$handler->field_alias})) {
-        $tokens["[$field]"] = $row->{$handler->field_alias};
-      }
-      else {
-        $tokens["[$field]"] = '';
-      }
-    }
-    $path = strip_tags(html_entity_decode(strtr($item_path, $tokens)));
-    if (empty($options['use_field_as_weight']['weight_text'])) {
-      // Use item sort order for weight calculation.
-      $weight = 1 + floor($options['size_interval'] * $index / $range);
-    }
-    elseif (isset($row->{$view->field[$options['use_field_as_weight']['weight_field']]->field_alias})) {
-      // Use (int) value of selected field for weight calculation.
-      $weight = 1 + floor($options['size_interval'] * intval($row->{$view->field[$options['use_field_as_weight']['weight_field']]->field_alias}) / $range);
-    }
-    $font_size = (intval($weight) * $options['flash_font_size_interval']) + ($options['flash_font_size'] - $options['flash_font_size_interval']);
-    $tags_formatted_flash .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('style' => 'font-size: ' . $font_size . 'px;')));
-    $tags_formatted_alt .= l($row->{$title_field->field_alias}, $path, array('attributes' => array('class' => 'tagadelic level' . $weight, 'rel' => 'tag', 'title' => $row->{$title_field->field_alias}))) . " \n";
-    $index++;
-  }
-
-  // Common variables we need regardless of implementation.
-  $flashvars = array(
-    'background' => $options['flash_background'],
-    'tcolor' => '0x' . $options['flash_color'],
-    'tcolor2' => '0x' . $options['flash_color2'],
-    'hicolor' => '0x' . $options['flash_hicolor'],
-    'tspeed' => $options['flash_speed'],
-    'distr' => $options['flash_distribute'],
-    'mode' => 'tags',
-    'tagcloud' => '<tags>' . $tags_formatted_flash . '</tags>',
-  );
-  $transparency = FALSE;
-  if ('true' == $options['flash_transparency']) {
-    $transparency = 'transparent';
-  }
-  $swf_url = url(drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf', array('absolute' => TRUE));
-
-  // If the swftools module and its submodule for swfobject is installed use
-  // it instead of our own implementation.
-  if (module_exists('swftools') && module_exists('swfobject2')) {
-    // Flash params
-    $swf_options = array(
-      'params' => array(
-        'width' => $options['flash_width'],
-        'height' => $options['flash_height'],
-      ),
-      'flashvars' => $flashvars,
-      'othervars' => array(
-        'no_flash' => $tags_formatted_alt,
-        'html_alt' => $tags_formatted_alt,
-      ),
-    );
-    if ($transparency) {
-      $params['wmode'] = $transparency;
-    }
-
-    $vars['cumulus'] = swf($swf_url, $swf_options);
-  }
-  // Use swfobject directly from google and own implementation. I don't like
-  // this but it makes the module run outofthebox and I didn't find a better
-  // way.
-  else {
-
-    drupal_set_html_head('<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>');
-    $temp_id = 'cumulus-' . time();
-    $params = array(
-      'wmode' => ( $transparency ? $transparency : 'opaque'),
-      'bgcolor' => $options['flash_background'],
-      'width' => $options['flash_width'],
-      'height' => $options['flash_height'],
-    );
-
-    $width = $options['flash_width'];
-    $height = $options['flash_height'];
-    $flashvars = drupal_to_js($flashvars);
-    $params = drupal_to_js($params);
-    $vars['cumulus'] = <<< EOT
-<div id="$temp_id">$tags_formatted_alt</div>
-<script type="text/javascript">
-swfobject.embedSWF(
-  "$swf_url",
-  "$temp_id",
-  "$width",
-  "$height",
-  "7",
-  "",
-  $flashvars,
-  $params
-);
-</script>
-EOT;
-  }
+  dpm($vars['rows']);
 }
 
 /**
@@ -169,4 +49,165 @@ function cumulus_help($path, $arg) {
       $output = '<p>' . t('Cumulus allows you to display strings like taxonomy\'s terms using a Flash movie that rotates them in 3D. This way, you can set it up like a 3D tag cloud. It works just like a regular tag cloud, but is more visually exciting!') . '</p>';
       return $output;
   }
+}
+
+function cumulus_views_options() {
+  $options = array();
+  $options['title_field'] = array('default' => '');
+  $options['link_field'] = array('default' => '');
+  $options['use_field_as_weight']['weight_text'] = array('default' => 0);
+  $options['use_field_as_weight']['weight_field'] = array('default' => '');
+  $options['size_interval'] = array('default' => 6);
+  $options['flash_width'] = array('default' => 200);
+  $options['flash_height'] = array('default' => 150);
+  $options['flash_background'] = array('default' => 'ffffff');
+  $options['flash_transparency'] = array('default' => 'false');
+  $options['flash_color'] = array('default' => 'ff0000');
+  $options['flash_color2'] = array('default' => '000000');
+  $options['flash_hicolor'] = array('default' => '666666');
+  $options['flash_speed'] = array('default' => 100);
+  $options['flash_distribute'] = array('default' => 'true');
+  $options['flash_font_size'] = array('default' => 10);
+  $options['flash_font_size_interval'] = array('default' => 2);
+  return $options;
+}
+
+function cumulus_views_options_form(&$form, &$form_state, $view) {
+  $fields = $view->view->display_handler->get_handlers('field');
+  if (count($fields)) {
+    $options = array('' => t('<None>'));
+    foreach ($fields as $field => $handler) {
+      if ($label = $handler->label()) {
+        $options[$field] = $label;
+      }
+      else {
+        $options[$field] = $handler->ui_name();
+      }
+    }
+    $form['title_field'] = array(
+      '#type' => 'select',
+      '#title' => t('Title field'),
+      '#options' => $options,
+      '#default_value' => $view->options['title_field'],
+      '#description' => t('Select the field that should be used as the items title in the cloud.'),
+    );
+    $form['link_field'] = array(
+      '#type' => 'select',
+      '#title' => t('Link field'),
+      '#options' => $options,
+      '#default_value' => $view->options['link_field'],
+      '#description' => t('Select the field that should be used as the items link in the cloud.'),
+    );
+    $form['use_field_as_weight']['#tree'] = TRUE;
+    $form['use_field_as_weight']['weight_text'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use a field as source for weight calculation'),
+      '#description' => t('If checked, you can select a field that is use as source for weight calculation instead of using the sort order.'),
+      '#default_value' => $view->options['use_field_as_weight']['weight_text'],
+    );
+    $form['use_field_as_weight']['weight_field'] = array(
+      '#type' => 'select',
+      '#title' => t('Weight field'),
+      '#options' => $options,
+      '#default_value' => $view->options['use_field_as_weight']['weight_field'],
+      '#description' => t('Select the field that should be used for weight calculation.'),
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array(
+        'edit-style-options-use-field-as-weight-weight-text' => array(1)
+      ),
+    );
+  }
+  else {
+    drupal_set_message(t('You need to define at least one field to set up a cumulus cloud view.', 'error'));
+  }
+  $form['size_interval'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Item size interval'),
+    '#default_value' => $view->options['size_interval'],
+    '#maxlength' => 2,
+    '#description' => t('The number of item sizes you want to use.'),
+  );
+  $form['flash_transparency'] = array(
+    '#type' => 'select',
+    '#title' => t('Background transparency'),
+    '#default_value' => $view->options['flash_transparency'],
+    '#options' => array(
+      'false' => t('no'),
+      'true' => t('yes'),
+    ),
+    '#description' => t('Enabling background transparency might cause issues with some (mostly older) browsers.<br />Under Linux, transparency doesn\'t work at all due to a known limitation in the current Flash player.'),
+  );
+  $form['flash_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width of cumulus'),
+    '#default_value' => $view->options['flash_width'],
+    '#maxlength' => 3,
+    '#description' => t('The width of the cumulus in pixels.'),
+  );
+  $form['flash_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height of cumulus'),
+    '#default_value' => $view->options['flash_height'],
+    '#maxlength' => 3,
+    '#description' => t('The height of the cumulus in pixels.'),
+  );
+  $form['flash_background'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Background color of cumulus'),
+    '#default_value' => $view->options['flash_background'],
+    '#maxlength' => 6,
+    '#description' => t('The hex color value for the background of the cumulus. E.g. ffffff. If "Background transparency" is enabled, this option will have no effect.'),
+  );
+  $form['flash_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Font color of cumulus'),
+    '#default_value' => $view->options['flash_color'],
+    '#maxlength' => 6,
+    '#description' => t('The hex color value you would like to use for the items. E.g. 000000.'),
+  );
+  $form['flash_color2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Second font color of cumulus'),
+    '#default_value' => $view->options['flash_color2'],
+    '#maxlength' => 6,
+    '#description' => t('Second item color. If supplied, items will get a color from a gradient between both colors based on their sorting.'),
+  );
+  $form['flash_hicolor'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Highlight color of cumulus'),
+    '#default_value' => $view->options['flash_hicolor'],
+    '#maxlength' => 6,
+    '#description' => t('The hex color value you would like to use for the item mouseover/hover color'),
+  );
+  $form['flash_speed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rotation speed'),
+    '#default_value' => $view->options['flash_speed'],
+    '#maxlength' => 3,
+    '#description' => t('Set the speed of the cumulus. Options between 25 and 500 work best.'),
+  );
+  $form['flash_distribute'] = array(
+    '#type' => 'select',
+    '#title' => t('Distribute items evenly on cumulus'),
+    '#default_value' => $view->options['flash_distribute'],
+    '#options' => array(
+      'false' => t('no'),
+      'true' => t('yes'),
+    ),
+    '#description' => t('When enabled, the movie will attempt to distribute the items evenly over the surface of the cumulus.'),
+  );
+  $form['flash_font_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Font size'),
+    '#default_value' => $view->options['flash_font_size'],
+    '#maxlength' => 2,
+    '#description' => t('Set the font size of the tag with the lowest item-size in pixels (level 1).'),
+  );
+  $form['flash_font_size_interval'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Font size interval'),
+    '#default_value' => $view->options['flash_font_size_interval'],
+    '#maxlength' => 1,
+    '#description' => t('Set the font size interval used for the different item-sizes (level 2 and higher).'),
+  );
 }
