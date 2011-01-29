@@ -31,10 +31,7 @@ class views_cumulus_style_plugin extends views_plugin_style {
     cumulus_views_options_form($form, $form_state, $this);
   }
 
-  function render_fields($result) {
-    if (!$this->uses_fields()) {
-      return;
-    }
+  function render() {
 
     $options = $this->view->style_options;
     if (empty($options['title_field'])) {
@@ -42,31 +39,26 @@ class views_cumulus_style_plugin extends views_plugin_style {
       return;
     }
 
+    if (!$this->uses_fields()) {
+      return;
+    }
+
     if (isset($this->rendered_fields)) {
       return $this->rendered_fields;
     }
-    $view = $this->view;
 
-    $title_alias = $view->field[$options['title_field']]->field_alias;
-    $weight_alias = $view->field[$options['use_field_as_weight']['weight_field']]->field_alias;
-
-    // Range is from 1 to count($rows).
-    $range = max(.01, count($result)) * 1.0001;
-
-    $index = 1;
-    $weight = 0;
-    $tags_formatted_flash = '';
-
-    $url_options = array();
-
-    if (!empty($view->exposed_raw_input)) {
-      $url_options['query'] = $view->exposed_raw_input;
+    $this->view->row_index = 0;
+    $keys = array_keys($this->view->field);
+    foreach ($this->view->result as $count => $row) {
+      $this->view->row_index = $count;
+      foreach ($keys as $id) {
+        $this->rendered_fields[$count][$id] = $this->view->field[$id]->theme($row);
+      }
     }
-
-
-    foreach ($result as $row) {
-      $row->nid = 1243;
-    }
+    unset($this->view->row_index);
+    //dpm($this->rendered_fields);
+    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+    return $output;
   }
 
 }
