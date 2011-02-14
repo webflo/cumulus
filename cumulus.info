@@ -1,5 +1,5 @@
 name = Cumulus
 description = "Provides a Flash-based 3D tag cloud."
-core = 6.x
+core = 7.x
 dependencies[] = tagadelic
 package = "Taxonomy"

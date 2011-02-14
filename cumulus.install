@@ -6,24 +6,30 @@
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function cumulus_install() {
-  drupal_install_schema('cumulus');
+  // TODO The drupal_(un)install_schema functions are called automatically in D7.
+  // drupal_install_schema('cumulus')
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function cumulus_schema() {
   return array();
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function cumulus_uninstall() {
-  drupal_uninstall_schema('cumulus');
-  db_query("DELETE FROM {variable} WHERE name LIKE 'cumulus_%'");
+  // TODO The drupal_(un)install_schema functions are called automatically in D7.
+  // drupal_uninstall_schema('cumulus')
+  // TODO Please review the conversion of this statement to the D7 database API syntax.
+  /* db_query("DELETE FROM {variable} WHERE name LIKE 'cumulus_%'") */
+  db_delete('variable')
+  ->condition('name', 'cumulus_%', 'LIKE')
+  ->execute();
 }
 
