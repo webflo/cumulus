@@ -1,4 +1,3 @@
-;$Id$
 name = Cumulus
 description = "Provides a Flash-based 3D tag cloud."
 core = 6.x
