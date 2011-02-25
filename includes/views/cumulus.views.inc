@@ -1,6 +1,5 @@
 <?php
 
-// $Id$
 /**
  * @file
  * Provide an cumulus style plugin for Views. This file is autoloaded by views.

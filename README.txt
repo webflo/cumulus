@@ -1,4 +1,3 @@
-/* $Id$ */
 /**
  * Cumulus for Drupal
  * README.txt
