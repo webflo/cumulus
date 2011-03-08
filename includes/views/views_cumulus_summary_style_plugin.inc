@@ -27,7 +27,14 @@ class views_cumulus_summary_style_plugin extends views_plugin_style_summary {
         'weight' => $row->num_records,
         );
     }
-    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+    $output .= theme($this->theme_functions(),
+      array(
+        'view' => $this->view,
+        'options' => $this->options,
+        'rows' => array(),
+        'title' => $title
+      ),
+    );
     return $output;
   }
 

@@ -55,8 +55,15 @@ class views_cumulus_style_plugin extends views_plugin_style {
       }
     }
     unset($this->view->row_index);
-    //dpm($this->rendered_fields);
-    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+    // TODO: title is undefined.
+    $output .= theme($this->theme_functions(),
+      array(
+        'view' => $this->view,
+        'options' => $this->options,
+        'rows' => array(),
+        'title' => $title,
+      ),
+    );
     return $output;
   }
 
