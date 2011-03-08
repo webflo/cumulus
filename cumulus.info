@@ -1,5 +1,8 @@
 name = Cumulus
 description = "Cumulus is a Views style plugin that provides a Flash-based 3D tag cloud."
-core = 6.x
+core = 7.x
 dependencies[] = views
 package = Views
+files[] = includes/views/cumulus.views.inc
+files[] = includes/views/views_cumulus_style_plugin.inc
+files[] = includes/views/views_cumulus_summary_style_plugin.inc
