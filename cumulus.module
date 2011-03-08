@@ -9,7 +9,7 @@
  */
 
 /**
- * Implementation of hook_enable().
+ * Implements hook_enable().
  */
 function cumulus_enable() {
   drupal_set_message(t('Cumulus has now been enabled. You need to !add a view with cumulus selected as output style to display the cloud. Or !activate the example view for a taxonomy cumulus block.', array('!add' => l(t('add'), 'admin/build/views/add'), '!activate' => l(t('activate'), 'admin/build/views'))));
@@ -19,12 +19,12 @@ function cumulus_enable() {
 }
 
 /**
- * Implementation of hook_views_api().
+ * Implements hook_views_api().
  * Notifies the Views module that we're compatible with a particular API revision.
  */
 function cumulus_views_api() {
   return array(
-    'api' => 2,
+    'api' => 3,
     'path' => drupal_get_path('module', 'cumulus') . '/includes/views',
   );
 }
@@ -36,13 +36,11 @@ function cumulus_views_api() {
  *  Array of template variables.
  */
 function template_preprocess_views_view_cumulus(&$vars) {
-
   dpm($vars['view']->style_plugin->rendered_fields);
-
 }
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  */
 function cumulus_help($path, $arg) {
   switch ($path) {
