@@ -112,10 +112,13 @@ function cumulus_views_options_form(&$form, &$form_state, $view) {
         '#options' => $options,
         '#default_value' => $view->options['use_field_as_weight']['weight_field'],
         '#description' => t('Select the field that should be used for weight calculation.'),
+        /*
+        // TODO: use drupal form states
         '#process' => array('views_process_dependency'),
         '#dependency' => array(
           'edit-style-options-use-field-as-weight-weight-text' => array(1)
         ),
+        */  
       );
     }
     else {
