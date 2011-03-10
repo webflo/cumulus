@@ -51,26 +51,26 @@ function cumulus_help($path, $arg) {
 }
 
 function cumulus_views_options() {
-  $options = array();
-  $options['title_field'] = array('default' => '');
-  $options['link_field'] = array('default' => '');
-  $options['use_field_as_weight']['weight_text'] = array('default' => 0);
-  $options['use_field_as_weight']['weight_field'] = array('default' => '');
-  $options['size_interval'] = array('default' => 6);
-  $options['flash_width'] = array('default' => 200);
-  $options['flash_height'] = array('default' => 150);
-  $options['flash_background'] = array('default' => 'ffffff');
-  $options['flash_transparency'] = array('default' => 'false');
-  $options['flash_color'] = array('default' => 'ff0000');
-  $options['flash_color2'] = array('default' => '000000');
-  $options['flash_hicolor'] = array('default' => '666666');
-  $options['flash_speed'] = array('default' => 100);
-  $options['flash_distribute'] = array('default' => 'true');
-  $options['flash_font_size'] = array('default' => 10);
-  $options['flash_font_size_interval'] = array('default' => 2);
-  return $options;
-}
+  return array(
+    'unique_id' => array('default' => ''),
+    'title_field' => array('default' => ''),
+    'link_field' => array('default' => ''),
+    'use_field_as_weight' => array(
+      'weight_text' => array('default' => 0),
+      'weight_field' => array('default' => ''),
     ),
+    'size_interval' => array('default' => 6),
+    'flash_width' => array('default' => 200),
+    'flash_height' => array('default' => 150),
+    'flash_background' => array('default' => 'ffffff'),
+    'flash_transparency' => array('default' => 'false'),
+    'flash_color' => array('default' => 'ff0000'),
+    'flash_color2' => array('default' => '000000'),
+    'flash_hicolor' => array('default' => '666666'),
+    'flash_speed' => array('default' => 100),
+    'flash_distribute' => array('default' => 'true'),
+    'flash_font_size' => array('default' => 10),
+    'flash_font_size_interval' => array('default' => 2),
   );
     ),
   );
