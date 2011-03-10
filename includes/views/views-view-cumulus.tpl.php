@@ -8,9 +8,6 @@
 ?>
 <div class="cumulus">
   <?php
-    /*
-    // TODO: $cumulus is undefined? rework views output.
     print $cumulus; 
-    */
   ?>
 </div>

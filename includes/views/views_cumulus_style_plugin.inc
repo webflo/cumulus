@@ -54,18 +54,15 @@ class views_cumulus_style_plugin extends views_plugin_style {
         $this->rendered_fields[$count][$id] = $this->view->field[$id]->theme($row);
       }
     }
+    
     unset($this->view->row_index);
-    // TODO: title is undefined.
-    $output .= theme($this->theme_functions(),
+    $output = theme($this->theme_functions(),
       array(
         'view' => $this->view,
         'options' => $this->options,
-        'rows' => array(),
-        'title' => $title,
-      ),
+      )
     );
     return $output;
   }
-
 }
 

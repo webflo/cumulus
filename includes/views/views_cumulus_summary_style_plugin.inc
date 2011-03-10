@@ -33,7 +33,7 @@ class views_cumulus_summary_style_plugin extends views_plugin_style_summary {
         'options' => $this->options,
         'rows' => array(),
         'title' => $title
-      ),
+      )
     );
     return $output;
   }

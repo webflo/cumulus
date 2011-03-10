@@ -36,7 +36,61 @@ function cumulus_views_api() {
  *  Array of template variables.
  */
 function template_preprocess_views_view_cumulus(&$vars) {
-  dpm($vars['view']->style_plugin->rendered_fields);
+  $cumulus = array();
+  foreach($vars['view']->style_plugin->rendered_fields as $item) {
+    if (isset($cumulus[$item[$vars['view']->style_options['unique_id']]])) {
+      $cumulus[$item[$vars['view']->style_options['unique_id']]]['#count']++;
+    }
+    else {
+      $cumulus[$item[$vars['view']->style_options['unique_id']]] = (object) $item;
+      $cumulus[$item[$vars['view']->style_options['unique_id']]]->__count = 1;
+    }
+  }
+
+  $fields = array(
+    'title' => $vars['view']->style_options['title_field'],
+    'href' => $vars['view']->style_options['link_field'],
+  );
+  $vars['cumulus'] = theme('cumulus_embed', array('tags' => $cumulus, 'fields' => $fields, 'config' => $vars['view']->style_options));
+}
+
+/**
+ * API that returns an array with weighted tags
+ * This is the hard part. People with better ideas are very very welcome to
+ * send these to ber@webschuur.com. Distribution is one thing that needs
+ * attention.
+ *
+ * @param $tags
+ *   Alist of <em>objects</em> with the following attributes: $tag->count,
+ *   $tag->tid, $tag->name and $tag->vid. Each Tag will be calculated and
+ *   turned into a tag. Refer to tagadelic_get_weighted_tags() for an example.
+ * @param $steps
+ *   The amount of tag-sizes you will be using. If you give "12" you sill get
+ *   six different "weights". Defaults to 6 and is optional.
+ * @return
+ *   An <em>unordered</em> array with tags-objects, containing the attribute
+ *   $tag->weight;
+ */
+function cumulus_build_weighted_tags($tags, $steps = 6) {
+  // Find minimum and maximum log-count. By our MatheMagician Steven Wittens aka UnConeD.
+  $tags_tmp = array();
+  $min = 1e9;
+  $max = -1e9;
+  foreach ($tags as $id => $tag) {
+    $tag->__number_of_posts = $tag->__count;
+    $tag->__count = log($tag->__count);
+    $min = min($min, $tag->__count);
+    $max = max($max, $tag->__count);
+    $tags_tmp[$id] = $tag;
+  }
+  // Note: we need to ensure the range is slightly too large to make sure even
+  // the largest element is rounded down.
+  $range = max(.01, $max - $min) * 1.0001;
+
+  foreach ($tags_tmp as $key => $value) {
+    $tags[$key]->__weight = 1 + floor($steps * ($value->__count - $min) / $range);
+  }
+  return $tags;
 }
 
 /**
@@ -72,7 +126,102 @@ function cumulus_views_options() {
     'flash_font_size' => array('default' => 10),
     'flash_font_size_interval' => array('default' => 2),
   );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function cumulus_theme() {
+  return array(
+    'cumulus_weighted' => array(
+      'variables' => array('tags' => NULL, 'fields' => array(), 'config' => array()),
     ),
+    'cumulus_embed' => array(
+      'variables' => array('tags' => NULL, 'fields' => array(), 'config' => array()),
+    )
   );
+}
+
+/**
+ * Include Javascript file.
+ */
+function cumulus_init_js() {
+  $js = drupal_get_path('module', 'cumulus') . '/cumulus.js';
+  if (file_exists($js)) {
+    drupal_add_js($js, array('preprocess' => FALSE));
+  }
+  else {
+    drupal_set_message(t('The file @folder is missing. Please download it from !link, and add it to the Cumulus module folder!', array('@folder' => $js, '!link' => l('http://pratul.in/files/cumulus.js', 'http://pratul.in/files/cumulus.js'))), 'error');
+  }
+}
+
+/**
+ * Themeing function.
+ */
+function theme_cumulus_embed($variables) {
+  cumulus_init_js();
+  $config = $variables['config'];
+  $variables['tags'] = cumulus_build_weighted_tags($variables['tags']);
+  $variables['flash_tags'] = theme('cumulus_weighted', $variables);
+
+  // TODO: Implement flash alternative.
+  $variables['alt'] = '';
+
+  if ($config['flash_transparency'] == 'true') {
+    $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
+  }
+
+  // Flash params
+  $param = array(
+    'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf',
+    'width' => $config['flash_width'],
+    'height' => $config['flash_height'],
+    'background' => $config['flash_background'],
+    'color' => '0x' . $config['flash_color'],
+    'color2' => '0x' . $config['flash_color2'],
+    'hicolor' => '0x' . $config['flash_hicolor'],
+    'speed' => $config['flash_speed'],
+    'distribute' => $config['flash_distribute'],
+    'transparency' => $config['flash_transparency'],
   );
+
+  $return = <<<EOT
+    <div id="tags">
+    {$variables['alt']}
+      <script type="text/javascript">
+        var rnumber = Math.floor(Math.random()*9999999);
+        var widget_so = new SWFObject("{$param['path_to_flash']}?r="+rnumber, "cumulusflash", "{$param['width']}", "{$param['height']}", "9", "{$param['background']}");
+            {$param['transparency']}
+        widget_so.addParam("allowScriptAccess", "always");
+        widget_so.addVariable("tcolor", "{$param['color']}");
+        widget_so.addVariable("tcolor2", "{$param['color2']}");
+        widget_so.addVariable("hicolor", "{$param['hicolor']}");
+        widget_so.addVariable("tspeed", "{$param['speed']}");
+        widget_so.addVariable("distr", "{$param['distribute']}");
+        widget_so.addVariable("mode", "tags");
+        widget_so.addVariable("tagcloud", "{$variables['flash_tags']}");
+        widget_so.write("tags");
+      </script>
+    </div>
+EOT;
+  return $return;
+}
+
+/**
+ * Themeing function.
+ */
+function theme_cumulus_weighted($variables) {
+  $tags = $variables['tags'];
+  $fields = $variables['fields'];
+  $config = $variables['config'];
+
+  $output = '<tags>';
+  foreach ($tags as $tag) {
+    // assign font size
+    $font_size = (intval($tag->__weight) * $config['flash_font_size_interval']) + ($config['flash_font_size'] - $config['flash_font_size_interval']);
+    $output .= l($tag->{$fields['title']}, $tag->{$fields['href']}, array('attributes' => array('style' => '"font-size: ' . $font_size . 'px;"'))) . " \n";
+  }
+  $output .= '</tags>';
+  $output = urlencode($output);
+  return $output;
 }
