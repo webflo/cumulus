@@ -39,7 +39,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
   $cumulus = array();
   foreach($vars['view']->style_plugin->rendered_fields as $item) {
     if (isset($cumulus[$item[$vars['view']->style_options['unique_id']]])) {
-      $cumulus[$item[$vars['view']->style_options['unique_id']]]['#count']++;
+      $cumulus[$item[$vars['view']->style_options['unique_id']]]->__count++;
     }
     else {
       $cumulus[$item[$vars['view']->style_options['unique_id']]] = (object) $item;
