@@ -26,6 +26,7 @@ function cumulus_feature_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'cumulus';
+  $handler->display->display_options['style_options']['unique_id'] = 'tid';
   $handler->display->display_options['style_options']['title_field'] = 'name';
   $handler->display->display_options['style_options']['link_field'] = 'tid_1';
   $handler->display->display_options['style_options']['use_field_as_weight'] = array(
