@@ -167,10 +167,6 @@ function theme_cumulus_embed($variables) {
   // TODO: Implement flash alternative.
   $variables['alt'] = '';
 
-  if ($config['flash_transparency'] == 'true') {
-    $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
-  }
-
   // Flash params
   $param = array(
     'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf',
@@ -182,8 +178,11 @@ function theme_cumulus_embed($variables) {
     'hicolor' => '0x' . $config['flash_hicolor'],
     'speed' => $config['flash_speed'],
     'distribute' => $config['flash_distribute'],
-    'transparency' => $config['flash_transparency'],
   );
+
+  if ($config['flash_transparency'] == 'true') {
+    $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
+  }
 
   $return = <<<EOT
     <div id="tags">
