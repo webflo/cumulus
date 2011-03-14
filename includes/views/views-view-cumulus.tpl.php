@@ -6,8 +6,4 @@
  * @ingroup views_templates
  */
 ?>
-<div class="cumulus">
-  <?php
-    print $cumulus; 
-  ?>
-</div>
+<?php print $cumulus; ?>

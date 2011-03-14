@@ -6,3 +6,4 @@ package = Views
 files[] = includes/views/cumulus.views.inc
 files[] = includes/views/views_cumulus_style_plugin.inc
 files[] = includes/views/views_cumulus_summary_style_plugin.inc
+scripts[] = cumulus.module.js

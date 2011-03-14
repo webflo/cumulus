@@ -170,6 +170,7 @@ function theme_cumulus_embed($variables) {
   // Flash params
   $param = array(
     'path_to_flash' => base_path() . drupal_get_path('module', 'cumulus') . '/includes/tagcloud.swf',
+    'flash_tags' => $variables['flash_tags'],
     'width' => $config['flash_width'],
     'height' => $config['flash_height'],
     'background' => $config['flash_background'],
@@ -178,32 +179,12 @@ function theme_cumulus_embed($variables) {
     'hicolor' => '0x' . $config['flash_hicolor'],
     'speed' => $config['flash_speed'],
     'distribute' => $config['flash_distribute'],
+    'transparency' => $config['flash_transparency'],
   );
 
-  if ($config['flash_transparency'] == 'true') {
-    $param['transparency'] = 'widget_so.addParam("wmode", "transparent");';
-  }
-
-  $return = <<<EOT
-    <div id="tags">
-    {$variables['alt']}
-      <script type="text/javascript">
-        var rnumber = Math.floor(Math.random()*9999999);
-        var widget_so = new SWFObject("{$param['path_to_flash']}?r="+rnumber, "cumulusflash", "{$param['width']}", "{$param['height']}", "9", "{$param['background']}");
-            {$param['transparency']}
-        widget_so.addParam("allowScriptAccess", "always");
-        widget_so.addVariable("tcolor", "{$param['color']}");
-        widget_so.addVariable("tcolor2", "{$param['color2']}");
-        widget_so.addVariable("hicolor", "{$param['hicolor']}");
-        widget_so.addVariable("tspeed", "{$param['speed']}");
-        widget_so.addVariable("distr", "{$param['distribute']}");
-        widget_so.addVariable("mode", "tags");
-        widget_so.addVariable("tagcloud", "{$variables['flash_tags']}");
-        widget_so.write("tags");
-      </script>
-    </div>
-EOT;
-  return $return;
+  $hash = drupal_substr(md5(microtime()), 0, 5);
+  drupal_add_js(array('cumulus' => array($hash => $param)), 'setting');
+  return '<div id="cumulus-' . $hash .'" class="cumulus">' . $variables['alt'] . '</div>';
 }
 
 /**
@@ -213,14 +194,11 @@ function theme_cumulus_weighted($variables) {
   $tags = $variables['tags'];
   $fields = $variables['fields'];
   $config = $variables['config'];
-
-  $output = '<tags>';
+  $output = '';
   foreach ($tags as $tag) {
     // assign font size
     $font_size = (intval($tag->__weight) * $config['flash_font_size_interval']) + ($config['flash_font_size'] - $config['flash_font_size_interval']);
     $output .= l($tag->{$fields['title']}, $tag->{$fields['href']}, array('attributes' => array('style' => '"font-size: ' . $font_size . 'px;"'))) . " \n";
   }
-  $output .= '</tags>';
-  $output = urlencode($output);
-  return $output;
+  return '<tags>' . urlencode($output) . '</tags>';
 }
