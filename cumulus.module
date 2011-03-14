@@ -51,7 +51,7 @@ function template_preprocess_views_view_cumulus(&$vars) {
     'title' => $vars['view']->style_options['title_field'],
     'href' => $vars['view']->style_options['link_field'],
   );
-  $vars['cumulus'] = theme('cumulus_embed', array('tags' => $cumulus, 'fields' => $fields, 'config' => $vars['view']->style_options));
+  $vars['cumulus'] = theme('cumulus_embed', array('tags' => $cumulus, 'fields' => $fields, 'config' => $vars['view']->style_options, 'view' => $vars['view']));
 }
 
 /**
@@ -137,7 +137,7 @@ function cumulus_theme() {
       'variables' => array('tags' => NULL, 'fields' => array(), 'config' => array()),
     ),
     'cumulus_embed' => array(
-      'variables' => array('tags' => NULL, 'fields' => array(), 'config' => array()),
+      'variables' => array('tags' => NULL, 'fields' => array(), 'config' => array(), 'view' => NULL),
     )
   );
 }
